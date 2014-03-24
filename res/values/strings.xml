@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="hello">Hello World, MainActivity!</string>
+    <string name="app_name">BreakoutAR</string>
+    <string name="logo">Game Logo</string>
+    <string name="play">Play Button</string>
+    <string name="highScore">High Score </string>
+    <string name="help">Help</string>
+    
+</resources>

@@ -1,0 +1,238 @@
+package ch.bfh.ti.breakoutar.level;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import android.content.res.AssetManager;
+import ch.bfh.ti.breakoutar.activity.BreakoutARActivity;
+import ch.bfh.ti.breakoutar.andar.GameARObject;
+import ch.bfh.ti.breakoutar.common.Bound;
+import ch.bfh.ti.breakoutar.common.GLShape;
+import ch.bfh.ti.breakoutar.common.Level;
+import ch.bfh.ti.breakoutar.controller.CollisionController;
+import ch.bfh.ti.breakoutar.controller.GameARObjectController;
+import ch.bfh.ti.breakoutar.glshape.GLRectangle;
+import ch.bfh.ti.breakoutar.glshape.GLSphere;
+import ch.bfh.ti.breakoutar.glshape.GLSquare;
+import ch.bfh.ti.breakoutar.model.BoundBox;
+import ch.bfh.ti.breakoutar.model.BoundCircle;
+import ch.bfh.ti.breakoutar.model.GameShape;
+import ch.bfh.ti.breakoutar.model.Vector2;
+import ch.bfh.ti.breakoutar.utile.Constant;
+
+public class FirstLevel extends Level {
+
+	private GameShape gameBall,
+			  gameLiveQuantity;
+	
+	private int shapesToDestroy;
+	public static final float LEVEL_LIMIT_LEF = -43.0f,
+			 				  LEVEL_LIMIT_RIGHT= 55.5f,
+			 				  LEVEL_LIMIT_UP = 54.0f,
+							  LEVEL_LIMIT_DOWN = -90.0f;
+	
+	public FirstLevel(GameARObjectController gameARObjectController, AssetManager assetMang, int lives) {
+		super(gameARObjectController, assetMang, lives);
+	}
+
+	@Override
+	protected void createLevel() {	
+		List<GameShape> shapes = new ArrayList<GameShape>();
+		
+		float xCoordinate,
+		yCoordinate,
+		width, 
+		height,
+		xAchse,
+		yAchse,
+		zAchse;
+		
+		for (int i = 0; i < 1; i++) {	
+			for (int j = 0; j < 4; j++) { 
+				xCoordinate = -30 + i * 15.0f;
+				yCoordinate = 1 + j * 15.0f;
+				width = 5.0f;
+				height = 5.0f;
+				xAchse = yAchse = zAchse = 5.0f;
+				GLShape glBox = new GLSquare(Constant.BOX_PICTURE, xAchse, yAchse, zAchse, assetMang);
+				Bound boundingBox = new BoundBox(xCoordinate - width / 2 , yCoordinate - height / 2, width, height);
+				GameShape gameBox = new GameShape(Constant.BOX,  xCoordinate, yCoordinate, boundingBox, glBox);
+				shapes.add(gameBox);
+				this.shapesToDestroy++;
+			}
+		}
+		
+		
+		//level
+		GLShape glLevel = new GLRectangle(Constant.LEVEL_PICTURE, 10.0f, 10.0f, 0.0f, assetMang);
+		GameShape gameLevel = new GameShape(Constant.LEVEL, -60, 20, null, glLevel);
+		shapes.add(gameLevel);
+		
+		//current level
+		GLShape glCurrentLevel = new GLRectangle(Constant.FIRST_LEVEL_PICTURE, 5.0f, 5.0f, 0.0f, assetMang);
+		GameShape gameCurrentLevel = new GameShape(Constant.FIRST_LEVEL, -60.0f, 5.0f, null, glCurrentLevel);
+		shapes.add(gameCurrentLevel);
+		
+		//live
+		GLShape glLive = new GLRectangle(Constant.LIVE_PICTURE, 10.0f, 10.0f, 0.0f, assetMang);
+		GameShape gameLive = new GameShape(Constant.LIVE, -60.0f, -10.0f, null, glLive);
+		shapes.add(gameLive);
+		
+		//live quantity
+		GLShape glLiveQuantity = new GLRectangle(lives+".png", 5.0f, 5.0f, 0.0f, assetMang);
+		gameLiveQuantity = new GameShape(Constant.LIVE_QUANTITY, -60.0f, -25.0f, null, glLiveQuantity);
+		shapes.add(gameLiveQuantity);
+		
+		//board
+		GLShape glBoard = new GLRectangle(Constant.BOARD_PICTURE, 54.0f, 65.0f, -5.0f, assetMang);
+		GameShape gameBoard = new GameShape(Constant.BOARD,  6.0f, -2.5f, null, glBoard);
+		shapes.add(gameBoard);
+				
+		//wall left
+		GLShape glWallLeft = new GLSquare(Constant.WALL_PICTURE, 2.5f, 60.0f, 2.5f, assetMang);
+		Bound boundingBoxWallLeft = new BoundBox(-45.0f - 2.5f / 2 , -2.5f - 60.0f / 2, 2.5f, 60.0f);
+		GameShape gameWallLeft = new GameShape(Constant.WALL, -45.0f, -2.5f, boundingBoxWallLeft, glWallLeft);
+		shapes.add(gameWallLeft);
+		
+		//wall up
+		GLShape glWallUp = new GLSquare(Constant.WALL_PICTURE, 54.0f, 2.5f, 2.5f, assetMang);
+		Bound boundingBoxWallUp = new BoundBox(6.0f - 54.0f / 2 , 60f -  2.5f / 2, 55.0f, 2.5f);
+		GameShape gameWallUp = new GameShape(Constant.WALL, 6.0f, 60.0f, boundingBoxWallUp, glWallUp);
+		shapes.add(gameWallUp);
+		
+		//wall right
+		GLShape glWallRight = new GLSquare(Constant.WALL_PICTURE, 2.5f, 60.0f, 2.5f, assetMang);
+		Bound boundingBoxWallRight = new BoundBox(57.5f - 2.5f / 2 , -2.5f - 60.0f / 2, 2.5f, 60.0f);
+		GameShape gameWallRight = new GameShape(Constant.WALL, 57.5f, -2.5f, boundingBoxWallRight, glWallRight);
+		shapes.add(gameWallRight);
+		
+		//ball
+		GLShape glBall = new GLSphere(2.0f);
+		Bound ballBoundCircle = new BoundCircle(0.0f, -10.0f, 2.0f);
+		gameBall = new GameShape(Constant.BALL, 0.0f , -10.0f, ballBoundCircle, new Vector2(30, 30), glBall);
+		shapes.add(gameBall);
+
+		
+		List<GameShape> paddleShapes = new ArrayList<GameShape>();
+
+		GLShape glpaddle = new GLSquare(Constant.WALL_PICTURE, 10.0f, 2.0f, 2.0f, assetMang);
+		Bound boundingBoxPaddle = new BoundBox(0 - 10.0f / 2 , 0 - 2.0f / 2, 10.0f, 2.0f);
+		GameShape gamePaddle = new GameShape(Constant.PADDLE,  0, 0, boundingBoxPaddle, glpaddle);
+		paddleShapes.add(gamePaddle);
+		
+		Map<String, GameARObject> arObjects = gameARObjectController.breakoutARObjects;
+		
+		GameARObject paddleMarker = arObjects.get(Constant.PADDLE_MARKER_ID);
+		paddleMarker.setShapes(paddleShapes);
+		
+		GameARObject boardMarker = arObjects.get(Constant.BOARD_MARKER_ID);
+		boardMarker.setShapes(shapes);
+		boardMarker.setPaddleMarker(paddleMarker);
+	}
+	
+	public Level update(float deltaTime) { 
+		for(GameARObject breakoutARObj : gameARObjectController.breakoutARObjects.values()) {
+			List<GameShape> gameShapes = Collections.synchronizedList(breakoutARObj.shapes);
+			synchronized (gameShapes) { 
+				Iterator<GameShape> it = gameShapes.iterator();
+				while(it.hasNext()) {
+					GameShape shape = it.next();
+					shape.update(deltaTime);
+					
+					//if bound == null is this shape neither a box, a wall, nor a ball 
+					if(shape.bound == null){
+						continue;
+					}
+
+					if(shape.velocity != null){
+						testWallCollition(shape, deltaTime);
+					}
+
+					if(!shape.id.equals(Constant.BALL) && !shape.id.equals(Constant.WALL)){
+						if(testBallCollition(shape)){
+							it.remove();
+							this.shapesToDestroy--;
+						}
+					}
+				}
+			}
+		}
+		
+		
+		if(isBallUnderLevelDownLimit(deltaTime)){
+			lives--;
+			if(lives < 0){
+				levelState = LevelState.LOST;
+				GLShape glgameOver = new GLRectangle(Constant.GAME_OVER_PICTURE, 40.0f, 15.0f, 0.0f, assetMang);
+				GameShape gameOver = new GameShape(Constant.GAME_OVER, 5, -25, null, glgameOver);
+				gameARObjectController.breakoutARObjects.get(Constant.BOARD_MARKER_ID).shapes.add(gameOver);
+			}
+			else{
+				gameBall.position.xCoordinate = 0.0f;
+				gameBall.position.yCoordinate = 0.0f;
+				gameBall.bound.getPosition().xCoordinate = 0;
+				gameBall.bound.getPosition().yCoordinate = 0.0f;
+				gameLiveQuantity.glShape.setTextureName(lives+".png");
+			}
+			return null;
+		}		
+		
+		if(this.shapesToDestroy == 0) {
+			for(GameARObject breakoutARObj : gameARObjectController.breakoutARObjects.values()) {
+				breakoutARObj.shapes.clear();
+			}
+			return new SecondLevel(gameARObjectController, assetMang, lives);
+		}
+		
+		return null;
+	}
+	
+	
+	public void testWallCollition(GameShape gameShape, float deltaTime){
+		float total_moveX = gameShape.position.xCoordinate + gameShape.velocity.xCoordinate  * deltaTime;
+		float total_moveY = gameShape.position.yCoordinate + gameShape.velocity.yCoordinate  * deltaTime;
+		
+		if(total_moveY > LEVEL_LIMIT_UP){
+			BreakoutARActivity.soundPool.play(BreakoutARActivity.hitWallTrack, 0.5f, 0.5f, 0, 0, 1);
+			gameShape.velocity.yCoordinate = -gameShape.velocity.yCoordinate;
+		}
+		if (total_moveX > LEVEL_LIMIT_RIGHT || total_moveX < LEVEL_LIMIT_LEF) {
+			gameShape.velocity.xCoordinate = -gameShape.velocity.xCoordinate;
+			BreakoutARActivity.soundPool.play(BreakoutARActivity.hitWallTrack, 0.5f, 0.5f, 0, 0, 1);
+		}
+
+	}
+	
+	
+	public boolean testBallCollition(GameShape shape) {
+		if(CollisionController.overloapCircleAndRectangle((BoundCircle)gameBall.bound, (BoundBox)shape.bound)) {
+			if(shape.collided)
+				return false;
+
+			BreakoutARActivity.soundPool.play(BreakoutARActivity.hitBrickTrack, 0.5f, 0.5f, 0, 0, 1);
+			gameBall.velocity.yCoordinate= -gameBall.velocity.yCoordinate;
+
+			shape.collided = true;
+			if(shape.id.equals(Constant.BOX)) {
+				shape.removeLive();
+				if(shape.liveQuantity == 0){
+					return true;
+				}
+			}			
+		}
+		else if(shape.collided){
+			shape.collided = false;
+		}
+
+		return false;
+	}	
+	
+	
+	public boolean isBallUnderLevelDownLimit(float deltaTime){
+		float total_moveY = gameBall.position.yCoordinate + gameBall.velocity.yCoordinate  * deltaTime;
+		return total_moveY < LEVEL_LIMIT_DOWN;
+	}
+}

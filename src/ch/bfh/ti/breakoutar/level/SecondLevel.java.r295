@@ -1,0 +1,272 @@
+package ch.bfh.ti.breakoutar.level;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import android.content.res.AssetManager;
+import ch.bfh.ti.breakoutar.activity.BreakoutARActivity;
+import ch.bfh.ti.breakoutar.andar.GameARObject;
+import ch.bfh.ti.breakoutar.common.Bound;
+import ch.bfh.ti.breakoutar.common.GLShape;
+import ch.bfh.ti.breakoutar.common.Level;
+import ch.bfh.ti.breakoutar.controller.CollisionController;
+import ch.bfh.ti.breakoutar.controller.GameARObjectController;
+import ch.bfh.ti.breakoutar.glshape.GLRectangle;
+import ch.bfh.ti.breakoutar.glshape.GLSphere;
+import ch.bfh.ti.breakoutar.glshape.GLSquare;
+import ch.bfh.ti.breakoutar.model.BoundBox;
+import ch.bfh.ti.breakoutar.model.BoundCircle;
+import ch.bfh.ti.breakoutar.model.GameShape;
+import ch.bfh.ti.breakoutar.model.Vector2;
+import ch.bfh.ti.breakoutar.utile.Constant;
+
+/**
+ * The second level of the game
+ *
+ */
+public class SecondLevel extends Level {
+	
+	// Instance variables
+	private GameShape gameBall,
+			  gameLiveQuantity;  // the figure showing the live quantity of the current level
+	
+	// Level limits
+	public static final float LEVEL_LIMIT_LEF = -43.0f,
+							  LEVEL_LIMIT_RIGHT= 55.5f,
+							  LEVEL_LIMIT_UP = 54.0f,
+							  LEVEL_LIMIT_DOWN = -90.0f;
+
+	/**
+	 * Construct the level
+	 * @param gameARObjectController the controller of the ARObjects
+	 * @param assetMang object to set the texture
+	 * @param lives lives in this level. (How many lives the player has for this level)
+	 */
+	public SecondLevel(GameARObjectController gameARObjectController, AssetManager assetMang, int lives) {
+		super(gameARObjectController, assetMang, lives);
+	}
+
+	@Override
+	protected void createLevel() {	
+		List<GameShape> shapes = new ArrayList<GameShape>();
+
+		float xCoordinate,
+		yCoordinate,
+		width, 
+		height,
+		xAchse,
+		yAchse,
+		zAchse;
+		int boxLiveQuantity = 2;
+		for (int row = 0; row < 3; row++) {
+			for (int column = 0; column < 6; column++) {	
+				xCoordinate = -30 + column * 15.0f;
+				yCoordinate = 1 + row * 20.0f;
+				width = 5.0f;
+				height = 5.0f;
+				xAchse = yAchse = zAchse = 5.0f;
+				GLShape glBox = new GLSquare(Constant.BOX_PICTURE, xAchse, yAchse, zAchse, assetMang);
+				Bound boundingBox = new BoundBox(xCoordinate - width / 2 , yCoordinate - height / 2, width, height);
+				GameShape gameBox = new GameShape(Constant.BOX,  xCoordinate, yCoordinate, boundingBox, boxLiveQuantity, glBox);
+				shapes.add(gameBox);
+				this.shapesToDestroy++;
+			}
+		}
+
+
+		//level
+		GLShape glLevel = new GLRectangle(Constant.LEVEL_PICTURE, 10.0f, 10.0f, 0.0f, assetMang);
+		GameShape gameLevel = new GameShape(Constant.LEVEL, -60, 25, null, glLevel);
+		shapes.add(gameLevel);
+
+		//current level
+		GLShape glCurrentLevel = new GLRectangle(Constant.SECOND_LEVEL_PICTURE, 5.0f, 5.0f, 0.0f, assetMang);
+		GameShape gameCurrentLevel = new GameShape(Constant.SECOND_LEVEL, -60.0f, 5.0f, null, glCurrentLevel);
+		shapes.add(gameCurrentLevel);
+
+		//live
+		GLShape glLive = new GLRectangle(Constant.LIVE_PICTURE, 10.0f, 10.0f, 0.0f, assetMang);
+		GameShape gameLive = new GameShape(Constant.LIVE, -60.0f, -15.0f, null, glLive);
+		shapes.add(gameLive);
+
+		//live quantity
+		GLShape glLiveQuantity = new GLRectangle(lives+".png", 5.0f, 5.0f, 0.0f, assetMang);
+		gameLiveQuantity = new GameShape(Constant.LIVE_QUANTITY, -60.0f, -33.0f, null, glLiveQuantity);
+		shapes.add(gameLiveQuantity);
+
+		//board
+		GLShape glBoard = new GLRectangle(Constant.BOARD_PICTURE, 54.0f, 65.0f, -5.0f, assetMang);
+		GameShape gameBoard = new GameShape(Constant.BOARD,  6.0f, -2.5f, null, glBoard);
+		shapes.add(gameBoard);
+
+		//wall left
+		GLShape glWallLeft = new GLSquare(Constant.WALL_PICTURE, 2.5f, 60.0f, 2.5f, assetMang);
+		Bound boundingBoxWallLeft = new BoundBox(-45.0f - 2.5f / 2 , -2.5f - 60.0f / 2, 2.5f, 60.0f);
+		GameShape gameWallLeft = new GameShape(Constant.WALL, -45.0f, -2.5f, boundingBoxWallLeft, glWallLeft);
+		shapes.add(gameWallLeft);
+
+		//wall up
+		GLShape glWallUp = new GLSquare(Constant.WALL_PICTURE, 54.0f, 2.5f, 2.5f, assetMang);
+		Bound boundingBoxWallUp = new BoundBox(6.0f - 54.0f / 2 , 60f -  2.5f / 2, 55.0f, 2.5f);
+		GameShape gameWallUp = new GameShape(Constant.WALL, 6.0f, 60.0f, boundingBoxWallUp, glWallUp);
+		shapes.add(gameWallUp);
+
+		//wall right
+		GLShape glWallRight = new GLSquare(Constant.WALL_PICTURE, 2.5f, 60.0f, 2.5f, assetMang);
+		Bound boundingBoxWallRight = new BoundBox(57.5f - 2.5f / 2 , -2.5f - 60.0f / 2, 2.5f, 60.0f);
+		GameShape gameWallRight = new GameShape(Constant.WALL, 57.5f, -2.5f, boundingBoxWallRight, glWallRight);
+		shapes.add(gameWallRight);
+
+		//ball
+		GLShape glBall = new GLSphere(2.0f);
+		Bound ballBoundCircle = new BoundCircle(0.0f, -10.0f, 2.0f);
+		gameBall = new GameShape(Constant.BALL, 0.0f , -10.0f, ballBoundCircle, new Vector2(40, 40), glBall);
+		shapes.add(gameBall);
+
+
+		List<GameShape> paddleShapes = new ArrayList<GameShape>();
+		
+		// Paddle
+		GLShape glpaddle = new GLSquare(Constant.PADDLE_PICTURE, 6.0f, 2.0f, 2.0f, assetMang);
+		Bound boundingBoxPaddle = new BoundBox(0 - 6.0f / 2 , 0 - 2.0f / 2, 6.0f, 2.0f);
+		GameShape gamePaddle = new GameShape(Constant.PADDLE,  0, 0, boundingBoxPaddle, glpaddle);
+		paddleShapes.add(gamePaddle);
+
+		Map<String, GameARObject> arObjects = gameARObjectController.breakoutARObjects;
+
+		GameARObject paddleMarker = arObjects.get(Constant.PADDLE_MARKER_ID);
+		paddleMarker.shapes = paddleShapes; //Set the paddles (only one the paddle)
+
+		GameARObject boardMarker = arObjects.get(Constant.BOARD_MARKER_ID);
+		boardMarker.shapes = shapes;  // Set the shapes to the main board
+		boardMarker.paddleMarker = paddleMarker;
+	}
+
+	public Level update(float deltaTime) { 
+		for(GameARObject breakoutARObj : gameARObjectController.breakoutARObjects.values()) {
+			List<GameShape> gameShapes = breakoutARObj.shapes;
+				Iterator<GameShape> it = gameShapes.iterator();
+				while(it.hasNext()) {
+					GameShape shape = it.next();
+					shape.update(deltaTime);
+					
+					//if bound == null is this shape neither a box, a wall, nor a ball 
+					// This shapes represent the level, lives or board of the game
+					if(shape.bound == null){
+						continue;
+					}
+					// if the shape has a velocity tested for collision with the wall
+					if(shape.velocity != null){
+						testWallCollition(shape, deltaTime);
+					}
+					
+					// if this shape is a box tested for collision with the ball
+					if(!shape.id.equals(Constant.BALL) && !shape.id.equals(Constant.WALL)){
+						if(testBallCollition(shape)){  // if this is true 
+							it.remove();			 // remove the shape from the level   
+							this.shapesToDestroy--;   //  there a shape less to distroy in this level
+						}
+					}
+				}
+		}
+
+		 // tested if the ball if under the level limit
+		if(isBallUnderLevelDownLimit(deltaTime)){
+			lives--; // remove a lives from the player
+			// if the live is smaller the 0, the player lose the game
+			if(lives < 0){
+				levelState = LevelState.LOST;
+				// show the game over picture
+				GLShape glgameOver = new GLRectangle(Constant.GAME_OVER_PICTURE, 40.0f, 15.0f, 0.0f, assetMang);
+				GameShape gameOver = new GameShape(Constant.GAME_OVER, 5, -25, null, glgameOver);
+				gameARObjectController.breakoutARObjects.get(Constant.BOARD_MARKER_ID).shapes.add(gameOver);
+			}
+			else{
+				// set the position of the ball to 0,0
+				gameBall.position.xCoordinate = 0.0f;
+				gameBall.position.yCoordinate = 0.0f;
+				gameBall.bound.getPosition().xCoordinate = 0;
+				gameBall.bound.getPosition().yCoordinate = 0.0f;
+				gameLiveQuantity.glShape.setTextureName(lives+".png"); // remove the lives of the game (picture)
+			}
+			return null;
+		}		
+		// if there is no more shapes to destroy the player won the game
+		if(this.shapesToDestroy == 0) {
+			levelState = LevelState.WIN;
+			// The player won the game. Show the won game picture
+			GLShape glgameWin = new GLRectangle(Constant.GAME_WON_PICTURE, 40.0f, 15.0f, 0.0f, assetMang);
+			GameShape gameWin = new GameShape(Constant.GAME_WON, 5, -25, null, glgameWin);
+			gameARObjectController.breakoutARObjects.get(Constant.BOARD_MARKER_ID).shapes.add(gameWin);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Tested if a game shape makes a collision with the wall
+	 * @param gameShape the game shape
+	 * @param deltaTime the delta time
+	 */
+	private void testWallCollition(GameShape gameShape, float deltaTime){
+		// get the x ,y coordinates of the shape
+		float total_moveX = gameShape.position.xCoordinate + gameShape.velocity.xCoordinate  * deltaTime;
+		float total_moveY = gameShape.position.yCoordinate + gameShape.velocity.yCoordinate  * deltaTime;
+
+		// if the y coordinate of the shape larger than the LEVEL_LIMIT_UP is, play a sound by 
+		// the collision and change the y coordinate of the ball
+		if(total_moveY > LEVEL_LIMIT_UP){
+			BreakoutARActivity.soundPool.play(BreakoutARActivity.hitWallTrack, 0.5f, 0.5f, 0, 0, 1);
+			gameShape.velocity.yCoordinate = -gameShape.velocity.yCoordinate;
+		}
+		// if the x coordinates of the shape larger than the LEVEL_LIMIT_RIGHT or smaller than LEVEL_LIMIT_LEF is, play a sound by 
+		// the collision and change the x coordinate of the ball
+		if (total_moveX > LEVEL_LIMIT_RIGHT || total_moveX < LEVEL_LIMIT_LEF) {
+			gameShape.velocity.xCoordinate = -gameShape.velocity.xCoordinate;
+			BreakoutARActivity.soundPool.play(BreakoutARActivity.hitWallTrack, 0.5f, 0.5f, 0, 0, 1);
+		}
+
+	}
+
+	/**
+	 * Testet if the given shape make a collision with the ball
+	 * @param shape the shape
+	 * @return true if there is a collision else false
+	 */
+	private boolean testBallCollition(GameShape shape) {
+		if(CollisionController.overloapCircleAndRectangle((BoundCircle)gameBall.bound, (BoundBox)shape.bound)) {
+			if(shape.collided)
+				return false;
+			// play a sound for the collision
+			BreakoutARActivity.soundPool.play(BreakoutARActivity.hitBrickTrack, 0.5f, 0.5f, 0, 0, 1);
+			// change the direction of the ball
+			gameBall.velocity.yCoordinate= -gameBall.velocity.yCoordinate;
+
+			shape.collided = true;
+			if(shape.id.equals(Constant.BOX)) {
+				shape.removeLive(); // remove a live from the shape
+				shape.glShape.setTextureName(Constant.RED_BOX_PICTURE); // change the texture
+				if(shape.liveQuantity == 0){
+					return true;  // return true if the shape does not has more lives 
+				}
+			}			
+		}
+		else if(shape.collided){
+			shape.collided = false;
+		}
+
+		return false;
+	}	
+
+	/**
+	 * Tested if the Ball is under the level down limit
+	 * @param deltaTime the deltaTime 
+	 * @return true if the ball is under the Down level limit else false
+	 */
+	private boolean isBallUnderLevelDownLimit(float deltaTime){
+		float total_moveY = gameBall.position.yCoordinate + gameBall.velocity.yCoordinate  * deltaTime;
+		return total_moveY < LEVEL_LIMIT_DOWN;
+	}
+}
